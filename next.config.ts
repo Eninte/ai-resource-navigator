@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  // Ensure API routes work in serverless environment
+  trailingSlash: false,
   // Security headers
   async headers() {
     return [
