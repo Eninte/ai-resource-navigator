@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Resource {
+  id                    String    @id @default(uuid())
+  name                  String
+  description           String?
+  url                   String    @unique
+  category              String    @default("uncategorized")
+  tags                  String[]
+  price                 String    @default("Freemium")
+  is_open_source        Boolean   @default(false)
+  source                String    // 'seed' | 'web'
+  status                String    @default("pending") // 'pending' | 'published' | 'rejected' | 'archived'
+  global_sticky_order   Int       @default(0)
+  category_sticky_order Int       @default(0)
+  submitter_ip          String?
+  published_at          DateTime?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  
+  clicks                Click[]
+  admin_logs            AdminLog[]
+  
+  @@index([status])
+  @@index([category])
+  @@index([published_at])
+  @@index([global_sticky_order])
+  @@index([category_sticky_order])
+}
+
+model Click {
+  id          String    @id @default(uuid())
+  resource_id String
+  clicked_at  DateTime  @default(now())
+  ip_hash     String
+  user_agent  String?
+  referrer    String?
+  
+  resource    Resource  @relation(fields: [resource_id], references: [id], onDelete: Cascade)
+  
+  @@index([resource_id])
+  @@index([clicked_at])
+}
+
+model AdminLog {
+  id          String    @id @default(uuid())
+  action      String    // 'login_success' | 'login_failed' | 'approve' | 'reject' | 'edit' | 'archive' | 'sticky_update'
+  ip_hash     String
+  resource_id String?
+  details     Json?
+  created_at  DateTime  @default(now())
+  
+  resource    Resource? @relation(fields: [resource_id], references: [id], onDelete: SetNull)
+  
+  @@index([action])
+  @@index([created_at])
+}
+
+model Category {
+  id            String    @id @default(uuid())
+  slug          String    @unique
+  name          String
+  display_order Int
+  is_active     Boolean   @default(true)
+  created_at    DateTime  @default(now())
+  
+  @@index([display_order])
+}
