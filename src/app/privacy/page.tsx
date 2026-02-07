@@ -19,7 +19,7 @@ export default function PrivacyPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-4">1. 概述</h2>
             <p className="text-gray-600">
-              AI资源导航站（以下简称"本网站"）重视您的隐私。本隐私政策说明我们在您使用本网站时如何收集、使用和保护您的个人信息。
+              AI资源导航站（以下简称&quot;本网站&quot;）重视您的隐私。本隐私政策说明我们在您使用本网站时如何收集、使用和保护您的个人信息。
             </p>
           </section>
 

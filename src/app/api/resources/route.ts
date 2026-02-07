@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma, Resource } from '@prisma/client';
 import { db } from '@/lib/supabase-db';
 
+type ResourceListItem = Pick<
+  Resource,
+  | 'id'
+  | 'name'
+  | 'description'
+  | 'url'
+  | 'category'
+  | 'price'
+  | 'is_open_source'
+  | 'global_sticky_order'
+  | 'category_sticky_order'
+  | 'published_at'
+>;
+
 const MOCK_RESOURCES = [
   {
     id: 'mock-1',
@@ -98,7 +112,7 @@ export async function GET(request: NextRequest) {
         ];
     }
 
-    const resources = await db.resource.findMany({
+    const resources = (await db.resource.findMany({
       where,
       orderBy: sort === 'random' ? undefined : orderBy,
       select: {
@@ -113,21 +127,21 @@ export async function GET(request: NextRequest) {
         category_sticky_order: true,
         published_at: true,
       },
-    });
+    })) as ResourceListItem[];
 
     // Handle random sorting
     let result = resources;
     if (sort === 'random') {
       // Keep sticky items at the top, randomize the rest
       const stickyItems = resources.filter(
-        (r: Resource) => r.global_sticky_order > 0 || r.category_sticky_order > 0
+        (r) => r.global_sticky_order > 0 || r.category_sticky_order > 0
       );
       const nonStickyItems = resources.filter(
-        (r: Resource) => r.global_sticky_order === 0 && r.category_sticky_order === 0
+        (r) => r.global_sticky_order === 0 && r.category_sticky_order === 0
       );
       
       // Sort sticky items by their order
-      stickyItems.sort((a: Resource, b: Resource) => {
+      stickyItems.sort((a, b) => {
         if (a.global_sticky_order !== b.global_sticky_order) {
           return b.global_sticky_order - a.global_sticky_order;
         }
@@ -140,14 +154,14 @@ export async function GET(request: NextRequest) {
     } else {
       // Ensure sticky items are at the top for other sorts too
       const stickyItems = resources.filter(
-        (r: Resource) => r.global_sticky_order > 0 || r.category_sticky_order > 0
+        (r) => r.global_sticky_order > 0 || r.category_sticky_order > 0
       );
       const nonStickyItems = resources.filter(
-        (r: Resource) => r.global_sticky_order === 0 && r.category_sticky_order === 0
+        (r) => r.global_sticky_order === 0 && r.category_sticky_order === 0
       );
       
       // Sort sticky items
-      stickyItems.sort((a: Resource, b: Resource) => {
+      stickyItems.sort((a, b) => {
         if (a.global_sticky_order !== b.global_sticky_order) {
           return b.global_sticky_order - a.global_sticky_order;
         }

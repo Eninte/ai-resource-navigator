@@ -1,19 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 export function CookieConsent() {
-  const [showBanner, setShowBanner] = useState(false);
-
-  useEffect(() => {
-    // Check if user has already made a choice
-    const consent = localStorage.getItem('cookie-consent');
-    if (!consent) {
-      setShowBanner(true);
-    }
-  }, []);
+  const [showBanner, setShowBanner] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !localStorage.getItem('cookie-consent');
+  });
 
   const handleAccept = () => {
     localStorage.setItem('cookie-consent', 'accepted');
@@ -37,7 +32,7 @@ export function CookieConsent() {
             <h3 className="font-medium mb-1">Cookie 使用说明</h3>
             <p className="text-sm text-gray-600">
               我们使用 Cookie 来改善您的浏览体验、分析网站流量，并记录资源点击统计。
-              点击"接受"即表示您同意我们的
+              点击&quot;接受&quot;即表示您同意我们的
               <a href="/privacy" className="text-blue-600 hover:underline ml-1">
                 隐私政策
               </a>

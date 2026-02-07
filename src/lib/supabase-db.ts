@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { createClient } from '@supabase/supabase-js';
@@ -36,7 +37,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Database abstraction layer
 export const db = {
   resource: {
-    findMany: async (params: any) => {
+    findMany: async (params: Prisma.ResourceFindManyArgs) => {
       if (USE_SUPABASE_API) {
         // Use Supabase API for local development
         const { where, orderBy, select } = params;
@@ -51,24 +52,45 @@ export const db = {
         if (where?.category && where.category !== 'all') {
           query = query.eq('category', where.category);
         }
-        if (where?.OR) {
+        if (where?.OR && Array.isArray(where.OR)) {
           // Search logic
-          const searchTerm = where.OR[0].name.contains;
-          query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+          const first = where.OR[0];
+          const searchTerm =
+            typeof first === 'object' &&
+            first &&
+            'name' in first &&
+            typeof first.name === 'object' &&
+            first.name &&
+            'contains' in first.name
+              ? String(first.name.contains)
+              : '';
+          if (searchTerm) {
+            query = query.or(
+              `name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`
+            );
+          }
         }
 
         // Handle ordering
         if (orderBy) {
+          const applyOrder = (
+            order: Prisma.ResourceOrderByWithRelationInput
+          ) => {
+            const [key, value] = Object.entries(order)[0] ?? [];
+            if (
+              typeof key === 'string' &&
+              (value === 'asc' || value === 'desc')
+            ) {
+              query = query.order(key, { ascending: value === 'asc' });
+            }
+          };
+
           if (Array.isArray(orderBy)) {
             for (const order of orderBy) {
-              const key = Object.keys(order)[0];
-              const dir = order[key];
-              query = query.order(key, { ascending: dir === 'asc' });
+              applyOrder(order);
             }
           } else {
-            const key = Object.keys(orderBy)[0];
-            const dir = orderBy[key];
-            query = query.order(key, { ascending: dir === 'asc' });
+            applyOrder(orderBy);
           }
         }
 
@@ -82,7 +104,7 @@ export const db = {
       }
     },
 
-    findUnique: async (params: any) => {
+    findUnique: async (params: Prisma.ResourceFindUniqueArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
         const { data, error } = await supabase
@@ -98,7 +120,7 @@ export const db = {
       }
     },
 
-    update: async (params: any) => {
+    update: async (params: Prisma.ResourceUpdateArgs) => {
       if (USE_SUPABASE_API) {
         const { where, data } = params;
         const { data: result, error } = await supabase
@@ -115,7 +137,7 @@ export const db = {
       }
     },
 
-    create: async (params: any) => {
+    create: async (params: Prisma.ResourceCreateArgs) => {
       if (USE_SUPABASE_API) {
         const { data } = params;
         const { data: result, error } = await supabase
@@ -131,7 +153,7 @@ export const db = {
       }
     },
 
-    count: async (params: any) => {
+    count: async (params: Prisma.ResourceCountArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
         let query = supabase
@@ -154,7 +176,7 @@ export const db = {
       }
     },
 
-    findFirst: async (params: any) => {
+    findFirst: async (params: Prisma.ResourceFindFirstArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
         let query = supabase
@@ -175,7 +197,7 @@ export const db = {
       }
     },
 
-    delete: async (params: any) => {
+    delete: async (params: Prisma.ResourceDeleteArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
         const { error } = await supabase
@@ -192,7 +214,7 @@ export const db = {
   },
 
   category: {
-    findMany: async (params: any) => {
+    findMany: async (params: Prisma.CategoryFindManyArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
         let query = supabase
@@ -214,7 +236,7 @@ export const db = {
   },
 
   click: {
-    create: async (params: any) => {
+    create: async (params: Prisma.ClickCreateArgs) => {
       if (USE_SUPABASE_API) {
         const { data } = params;
         const { error } = await supabase
@@ -230,7 +252,7 @@ export const db = {
   },
 
   adminLog: {
-    create: async (params: any) => {
+    create: async (params: Prisma.AdminLogCreateArgs) => {
       if (USE_SUPABASE_API) {
         const { data } = params;
         const { error } = await supabase
@@ -244,19 +266,29 @@ export const db = {
       }
     },
 
-    findMany: async (params: any) => {
+    findMany: async (params: Prisma.AdminLogFindManyArgs) => {
       if (USE_SUPABASE_API) {
         const { take, skip, orderBy } = params;
         let query = supabase
           .from('AdminLog')
           .select('*');
 
-        if (take) query = query.limit(take);
-        if (skip) query = query.range(skip, skip + take - 1);
+        if (take !== undefined) query = query.limit(take);
+        if (skip !== undefined) {
+          if (take !== undefined) {
+            query = query.range(skip, skip + take - 1);
+          } else {
+            query = query.range(skip, skip);
+          }
+        }
         if (orderBy) {
-          const key = Object.keys(orderBy)[0];
-          const dir = orderBy[key];
-          query = query.order(key, { ascending: dir === 'asc' });
+          const [key, value] = Object.entries(orderBy)[0] ?? [];
+          if (
+            typeof key === 'string' &&
+            (value === 'asc' || value === 'desc')
+          ) {
+            query = query.order(key, { ascending: value === 'asc' });
+          }
         }
 
         const { data, error } = await query;
@@ -268,7 +300,7 @@ export const db = {
       }
     },
 
-    count: async (params: any) => {
+    count: async (params?: Prisma.AdminLogCountArgs) => {
       if (USE_SUPABASE_API) {
         const { data, error } = await supabase
           .from('AdminLog')

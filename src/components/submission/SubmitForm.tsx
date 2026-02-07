@@ -124,7 +124,7 @@ export function SubmitForm({ onSubmit, isSubmitting }: SubmitFormProps) {
                   ))}
                 </SelectContent>
               </Select>
-              <FormDescription>选填，默认为"未分类"</FormDescription>
+              <FormDescription>选填，默认为&quot;未分类&quot;</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -150,7 +150,7 @@ export function SubmitForm({ onSubmit, isSubmitting }: SubmitFormProps) {
                   ))}
                 </SelectContent>
               </Select>
-              <FormDescription>选填，默认为"免费增值"</FormDescription>
+              <FormDescription>选填，默认为&quot;免费增值&quot;</FormDescription>
               <FormMessage />
             </FormItem>
           )}

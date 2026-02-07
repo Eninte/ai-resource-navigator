@@ -73,7 +73,7 @@ export async function PATCH(request: NextRequest) {
     const { id, status, category, global_sticky_order, category_sticky_order } = validationResult.data;
 
     // Get current resource
-    const currentResource = await prisma.resource.findUnique({
+    const currentResource = await db.resource.findUnique({
       where: { id },
     });
 
@@ -139,7 +139,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const currentResource = await prisma.resource.findUnique({
+    const currentResource = await db.resource.findUnique({
       where: { id },
     });
 
