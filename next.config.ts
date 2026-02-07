@@ -5,10 +5,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // Ensure API routes work in serverless environment
-  trailingSlash: false,
-  // Disable static export for API routes to work
-  distDir: '.next',
   // Security headers
   async headers() {
     return [

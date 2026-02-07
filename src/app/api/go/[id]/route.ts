@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/supabase-db';
 import { getClientIP } from '@/lib/security';
 import { hashIp } from '@/lib/crypto-node';
 
@@ -11,7 +11,7 @@ export async function GET(
     const { id } = await params;
 
     // Find the resource
-    const resource = await prisma.resource.findUnique({
+    const resource = await db.resource.findUnique({
       where: {
         id,
         status: 'published',
@@ -35,7 +35,7 @@ export async function GET(
       const userAgent = request.headers.get('user-agent');
       const referrer = request.headers.get('referer');
 
-      await prisma.click.create({
+      await db.click.create({
         data: {
           resource_id: id,
           ip_hash: hashIp(ip),

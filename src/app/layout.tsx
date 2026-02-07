@@ -10,6 +10,9 @@ import "@fontsource/geist/600.css";
 import "@fontsource/geist/700.css";
 import "@fontsource/geist-mono/400.css";
 import "@fontsource/geist-mono/500.css";
+// Import Montserrat for headings
+import "@fontsource/montserrat/600.css";
+import "@fontsource/montserrat/700.css";
 
 export const metadata: Metadata = {
   title: "AI资源导航 - 发现最佳AI工具",

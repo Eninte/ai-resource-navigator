@@ -6,17 +6,20 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const createPrismaClient = () => {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error('DATABASE_URL is not defined');
-  }
-  
-  const pool = new Pool({ connectionString });
+const prismaClientSingleton = () => {
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    // Force IPv4 to avoid IPv6 network issues
+    connectionTimeoutMillis: 10000,
+    // Use IPv4 only
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 };
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;

@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { NextRequest } from 'next/server';
 import { hashIp } from './crypto-node';
-import { prisma } from './db';
+import { db } from './supabase-db';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-secret-key-change-in-production'
@@ -79,7 +79,7 @@ export async function logAdminAction(
                '127.0.0.1';
     const ipHash = hashIp(ip);
 
-    await prisma.adminLog.create({
+    await db.adminLog.create({
       data: {
         action,
         ip_hash: ipHash,

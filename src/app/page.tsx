@@ -85,20 +85,38 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/30">
+    <div className="min-h-screen flex flex-col bg-linear-to-b from-background to-muted/30">
       <Header onSubmitClick={() => setIsSubmitModalOpen(true)} />
       
       <main className="flex-1 py-8">
         <Container>
           {/* Hero Section */}
-          <div className="text-center mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              发现最佳AI工具
+          <div className="relative text-center mb-16 py-8">
+            {/* Background Decorations - Optimized with Radial Gradient instead of Blur */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_70%)] opacity-10 -z-10 pointer-events-none" />
+            
+            <h2 className="text-4xl sm:text-5xl font-bold mb-6 bg-linear-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent font-[Montserrat]">
+              发现最佳 AI 工具
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-              探索全球顶尖AI资源，一站式发现你需要的AI工具
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
+              探索全球顶尖 AI 资源，一站式发现你需要的 AI 工具
             </p>
-            <SearchBar value={searchQuery} onChange={setSearchQuery} />
+            
+            {/* Social Proof */}
+            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground/80 font-medium">
+              <span className="flex items-center gap-2">
+                <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                已收录 1,000+ 优质工具
+              </span>
+              <span className="hidden sm:inline-block">|</span>
+              <span className="hidden sm:inline-block">每周持续更新</span>
+              <span className="hidden sm:inline-block">|</span>
+              <span className="hidden sm:inline-block">人工精选审核</span>
+            </div>
+            
+            <div className="mt-10">
+              <SearchBar value={searchQuery} onChange={setSearchQuery} />
+            </div>
           </div>
 
           {/* Filters */}

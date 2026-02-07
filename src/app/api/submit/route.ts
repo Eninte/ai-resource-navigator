@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/supabase-db';
 import { SubmitResourceSchema } from '@/lib/validation';
 import { sanitizeHTML, getClientIP } from '@/lib/security';
 import { hashIp } from '@/lib/crypto-node';
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const data = validationResult.data;
 
     // Check for duplicate URL
-    const existingResource = await prisma.resource.findFirst({
+    const existingResource = await db.resource.findFirst({
       where: {
         url: data.url,
         status: {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       : null;
 
     // Create resource
-    const resource = await prisma.resource.create({
+    const resource = await db.resource.create({
       data: {
         name: data.name,
         url: data.url,

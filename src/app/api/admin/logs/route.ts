@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/supabase-db';
 import { getAdminFromRequest } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -14,12 +14,12 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     const [logs, total] = await Promise.all([
-      prisma.adminLog.findMany({
+      db.adminLog.findMany({
         orderBy: { created_at: 'desc' },
         take: limit,
         skip: offset,
       }),
-      prisma.adminLog.count(),
+      db.adminLog.count(),
     ]);
 
     return NextResponse.json({ logs, total, limit, offset });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/supabase-db';
 import { getAdminFromRequest, logAdminAction } from '@/lib/auth';
 import { UpdateResourceSchema } from '@/lib/validation';
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    const resources = await prisma.resource.findMany({
+    const resources = await db.resource.findMany({
       where,
       orderBy: [
         { global_sticky_order: 'desc' },
@@ -96,7 +96,7 @@ export async function PATCH(request: NextRequest) {
       updateData.published_at = new Date();
     }
 
-    const updated = await prisma.resource.update({
+    const updated = await db.resource.update({
       where: { id },
       data: updateData,
     });
@@ -150,7 +150,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.resource.delete({
+    await db.resource.delete({
       where: { id },
     });
 
