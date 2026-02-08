@@ -1,0 +1,9 @@
+ID,Priority,Category,Task,Description,EstimatedEffort,ExpectedImpact
+1,High,Architecture,Migrate Home to SSR,Refactor src/app/page.tsx to fetch data server-side using Prisma directly. Remove 'use client' from page root.,3 days,Critical (Indexability)
+2,High,Content,Add H1 Tag,Change the main hero title from h2 to h1 in src/app/page.tsx.,30 mins,High (Keyword Ranking)
+3,High,Structured Data,Add JSON-LD,Inject WebSite and Organization schema in src/app/layout.tsx.,1 hour,High (Rich Snippets)
+4,Medium,Technical,Add Canonical Tags,Configure metadataBase and alternates in layout.tsx to generate self-referencing canonicals.,1 hour,Medium (Duplicate Content)
+5,Medium,Technical,Expand Sitemap,Update src/app/sitemap.ts to include dynamic category routes if/when created.,2 hours,Medium (Crawl Budget)
+6,Medium,UX/Performance,Fix CLS,Ensure skeleton loaders in CategorySection match the final rendered height.,4 hours,Medium (Core Web Vitals)
+7,Low,Content,Optimize Image Alt,Review ResourceCard component and ensure all logos have descriptive alt text.,1 hour,Low (Image Search)
+8,Low,Internationalization,Add Hreflang,Add x-default and zh-CN hreflang tags in layout.tsx.,30 mins,Low (Regional Targeting)
