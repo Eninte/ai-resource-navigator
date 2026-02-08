@@ -4,9 +4,6 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { createClient } from '@supabase/supabase-js';
 
-// Use Supabase API locally (to avoid IPv6 issues), Prisma in production
-const USE_SUPABASE_API = process.env.NODE_ENV !== 'production';
-
 // Prisma setup (for production)
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -29,10 +26,20 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Supabase client setup (for local development)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const canUseSupabase = Boolean(supabaseUrl && supabaseKey);
+const USE_SUPABASE_API =
+  process.env.NODE_ENV !== 'production' && canUseSupabase;
+const supabase = canUseSupabase
+  ? createClient(supabaseUrl as string, supabaseKey as string)
+  : null;
+const getSupabase = () => {
+  if (!supabase) {
+    throw new Error('Supabase client not configured');
+  }
+  return supabase;
+};
 
 // Database abstraction layer
 export const db = {
@@ -42,7 +49,8 @@ export const db = {
         // Use Supabase API for local development
         const { where, orderBy, select } = params;
 
-        let query = supabase
+        const client = getSupabase();
+        let query = client
           .from('Resource')
           .select(select ? Object.keys(select).join(',') : '*');
 
@@ -107,7 +115,7 @@ export const db = {
     findUnique: async (params: Prisma.ResourceFindUniqueArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
           .from('Resource')
           .select('*')
           .eq('id', where.id)
@@ -123,7 +131,7 @@ export const db = {
     update: async (params: Prisma.ResourceUpdateArgs) => {
       if (USE_SUPABASE_API) {
         const { where, data } = params;
-        const { data: result, error } = await supabase
+        const { data: result, error } = await getSupabase()
           .from('Resource')
           .update(data)
           .eq('id', where.id)
@@ -140,7 +148,7 @@ export const db = {
     create: async (params: Prisma.ResourceCreateArgs) => {
       if (USE_SUPABASE_API) {
         const { data } = params;
-        const { data: result, error } = await supabase
+        const { data: result, error } = await getSupabase()
           .from('Resource')
           .insert(data)
           .select()
@@ -156,7 +164,8 @@ export const db = {
     count: async (params: Prisma.ResourceCountArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
-        let query = supabase
+        const client = getSupabase();
+        let query = client
           .from('Resource')
           .select('*', { count: 'exact', head: true });
 
@@ -179,7 +188,8 @@ export const db = {
     findFirst: async (params: Prisma.ResourceFindFirstArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
-        let query = supabase
+        const client = getSupabase();
+        let query = client
           .from('Resource')
           .select('*')
           .limit(1);
@@ -200,7 +210,7 @@ export const db = {
     delete: async (params: Prisma.ResourceDeleteArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
-        const { error } = await supabase
+        const { error } = await getSupabase()
           .from('Resource')
           .delete()
           .eq('id', where.id);
@@ -217,7 +227,8 @@ export const db = {
     findMany: async (params: Prisma.CategoryFindManyArgs) => {
       if (USE_SUPABASE_API) {
         const { where } = params;
-        let query = supabase
+        const client = getSupabase();
+        let query = client
           .from('Category')
           .select('*');
 
@@ -239,7 +250,7 @@ export const db = {
     create: async (params: Prisma.ClickCreateArgs) => {
       if (USE_SUPABASE_API) {
         const { data } = params;
-        const { error } = await supabase
+        const { error } = await getSupabase()
           .from('Click')
           .insert(data);
 
@@ -255,7 +266,7 @@ export const db = {
     create: async (params: Prisma.AdminLogCreateArgs) => {
       if (USE_SUPABASE_API) {
         const { data } = params;
-        const { error } = await supabase
+        const { error } = await getSupabase()
           .from('AdminLog')
           .insert(data);
 
@@ -269,7 +280,8 @@ export const db = {
     findMany: async (params: Prisma.AdminLogFindManyArgs) => {
       if (USE_SUPABASE_API) {
         const { take, skip, orderBy } = params;
-        let query = supabase
+        const client = getSupabase();
+        let query = client
           .from('AdminLog')
           .select('*');
 
@@ -302,7 +314,7 @@ export const db = {
 
     count: async (params?: Prisma.AdminLogCountArgs) => {
       if (USE_SUPABASE_API) {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
           .from('AdminLog')
           .select('*', { count: 'exact', head: true });
 
