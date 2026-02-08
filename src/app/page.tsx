@@ -7,6 +7,7 @@ import { Container } from '@/components/layout/Container';
 import { SearchBar } from '@/components/resources/SearchBar';
 import { CategoryFilter } from '@/components/resources/CategoryFilter';
 import { SortDropdown } from '@/components/resources/SortDropdown';
+import { CategoryFeed } from '@/components/resources/CategoryFeed';
 import { ResourceList } from '@/components/resources/ResourceList';
 import { SubmitModal } from '@/components/submission/SubmitModal';
 import { CATEGORY_SLUGS } from '@/config/categories';
@@ -22,18 +23,26 @@ interface Resource {
   is_open_source: boolean;
   global_sticky_order: number;
   category_sticky_order: number;
+  published_at: Date | string;
 }
 
 export default function Home() {
   const [resources, setResources] = useState<Resource[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'default' | 'newest' | 'alphabetical' | 'random'>('default');
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
 
+  const isFiltering = !!(searchQuery || selectedCategory || sortBy !== 'default');
+
   const fetchResources = useCallback(async () => {
+    if (!isFiltering) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
@@ -66,7 +75,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [searchQuery, selectedCategory, sortBy, isFiltering]);
 
   useEffect(() => {
     fetchResources();
@@ -125,18 +134,24 @@ export default function Home() {
           </div>
 
           {/* Resource Count */}
-          <div className="mb-4 text-sm text-muted-foreground">
-            共 {resources.length} 个资源
-          </div>
-
-          {/* Resource List */}
-          {isLoading ? (
-            <div className="text-center py-16">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto" />
-              <p className="mt-4 text-muted-foreground">加载中...</p>
+          {isFiltering && (
+            <div className="mb-4 text-sm text-muted-foreground">
+              共 {resources.length} 个资源
             </div>
+          )}
+
+          {/* Resource List or Category Feed */}
+          {isFiltering ? (
+            isLoading ? (
+              <div className="text-center py-16">
+                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto" />
+                <p className="mt-4 text-muted-foreground">加载中...</p>
+              </div>
+            ) : (
+              <ResourceList resources={resources} />
+            )
           ) : (
-            <ResourceList resources={resources} />
+            <CategoryFeed />
           )}
         </Container>
       </main>
