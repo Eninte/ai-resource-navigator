@@ -10,7 +10,7 @@ import { SortDropdown } from '@/components/resources/SortDropdown';
 import { ResourceList } from '@/components/resources/ResourceList';
 import { SubmitModal } from '@/components/submission/SubmitModal';
 import { CATEGORY_SLUGS } from '@/config/categories';
-import { useToast } from '@/hooks/useToast';
+import { toast } from 'sonner';
 
 interface Resource {
   id: string;
@@ -32,7 +32,6 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<'default' | 'newest' | 'alphabetical' | 'random'>('default');
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
-  const { toast } = useToast();
 
   const fetchResources = useCallback(async () => {
     setIsLoading(true);
@@ -55,31 +54,26 @@ export default function Home() {
         });
         setCategoryCounts(counts);
       } else {
-        toast({
-          title: '错误',
+        toast.error('错误', {
           description: '获取资源列表失败',
-          variant: 'destructive',
         });
       }
     } catch (error) {
       console.error('Error fetching resources:', error);
-      toast({
-        title: '错误',
+      toast.error('错误', {
         description: '获取资源列表失败',
-        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery, selectedCategory, sortBy, toast]);
+  }, [searchQuery, selectedCategory, sortBy]);
 
   useEffect(() => {
     fetchResources();
   }, [fetchResources]);
 
   const handleSubmitSuccess = () => {
-    toast({
-      title: '提交成功',
+      toast.success('提交成功', {
       description: '您的资源已提交，等待审核',
     });
   };

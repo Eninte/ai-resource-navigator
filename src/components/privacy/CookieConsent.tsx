@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 export function CookieConsent() {
-  const [showBanner, setShowBanner] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return !localStorage.getItem('cookie-consent');
-  });
+  const [showBanner, setShowBanner] = useState(false);
+
+  useEffect(() => {
+    const consent = localStorage.getItem('cookie-consent');
+    setShowBanner(!consent);
+  }, []);
 
   const handleAccept = () => {
     localStorage.setItem('cookie-consent', 'accepted');

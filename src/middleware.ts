@@ -6,7 +6,7 @@ const PROTECTED_PATHS = ['/admin/dashboard'];
 
 const AUTH_PATHS = ['/admin/login'];
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isProtectedPath = PROTECTED_PATHS.some((path) =>

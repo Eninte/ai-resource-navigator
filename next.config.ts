@@ -1,11 +1,16 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import type { NextConfig } from "next";
 
+const root = path.dirname(fileURLToPath(import.meta.url));
+
 const nextConfig: NextConfig = {
-  // Server build for API routes and database support
   images: {
     unoptimized: true,
   },
-  // Security headers
+  turbopack: {
+    root,
+  },
   async headers() {
     return [
       {
