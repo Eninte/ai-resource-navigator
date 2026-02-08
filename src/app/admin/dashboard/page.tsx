@@ -7,6 +7,7 @@ import { PendingResources } from '@/components/admin/PendingResources';
 import { ResourceList } from '@/components/admin/ResourceList';
 import { StickyManager } from '@/components/admin/StickyManager';
 import { AdminLogs } from '@/components/admin/AdminLogs';
+import { DbConnectionChecker } from '@/components/admin/DbConnectionChecker';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -88,13 +89,14 @@ export default function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-md">
+          <TabsList className="grid w-full grid-cols-5 max-w-lg">
             <TabsTrigger value="pending">
               待审核 {pendingResources.length > 0 && `(${pendingResources.length})`}
             </TabsTrigger>
             <TabsTrigger value="resources">资源列表</TabsTrigger>
             <TabsTrigger value="sticky">置顶管理</TabsTrigger>
             <TabsTrigger value="logs">操作日志</TabsTrigger>
+            <TabsTrigger value="db-check">数据库检测</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending" className="space-y-4">
@@ -123,6 +125,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="logs" className="space-y-4">
             <AdminLogs logs={logs} isLoading={isLoading} />
+          </TabsContent>
+
+          <TabsContent value="db-check" className="space-y-4">
+            <DbConnectionChecker />
           </TabsContent>
         </Tabs>
       </main>
