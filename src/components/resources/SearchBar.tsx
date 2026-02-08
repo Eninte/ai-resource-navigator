@@ -42,7 +42,7 @@ export function SearchBar({
         value={inputValue}
         onChange={handleChange}
         placeholder={placeholder}
-        className="pl-10 pr-10 h-11"
+        className="pl-10 pr-10 h-12 rounded-full shadow-sm border-black/5 dark:border-white/10 focus-visible:ring-primary/20 focus-visible:border-primary/30 transition-all hover:shadow-md bg-background/80 backdrop-blur-sm"
       />
       {inputValue && (
         <Button

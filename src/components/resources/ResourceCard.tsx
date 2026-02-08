@@ -34,14 +34,16 @@ export function ResourceCard({ resource }: ResourceCardProps) {
 
   return (
     <Card className={cn(
-      'group relative transition-all duration-300 hover:-translate-y-1 overflow-hidden border-border/50',
-      'hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_40px_-15px_rgba(255,255,255,0.05)]',
-      'bg-card/80 hover:bg-card',
-      isSticky && 'ring-1 ring-primary/20 bg-primary/5'
+      'group relative transition-all duration-300 ease-out hover:-translate-y-1 overflow-hidden',
+      'border border-black/5 dark:border-white/10',
+      'shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)]',
+      'dark:shadow-[0_2px_8px_rgba(255,255,255,0.02)] dark:hover:shadow-[0_12px_32px_rgba(255,255,255,0.04)]',
+      'bg-card hover:bg-card/95',
+      isSticky && 'ring-1 ring-primary/20 bg-linear-to-br from-primary/5 to-transparent'
     )}>
       {isSticky && (
-        <div className="absolute top-0 right-0 p-2">
-          <Badge variant="secondary" className="bg-primary/90 hover:bg-primary text-primary-foreground shadow-sm">
+        <div className="absolute top-0 right-0 p-2 z-10">
+          <Badge variant="secondary" className="bg-primary/10 hover:bg-primary/20 text-primary backdrop-blur-sm shadow-sm border border-primary/10">
             置顶
           </Badge>
         </div>
@@ -49,23 +51,23 @@ export function ResourceCard({ resource }: ResourceCardProps) {
       
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2 pr-8">
-          <h3 className="font-semibold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">
+          <h3 className="font-semibold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors duration-300">
             {resource.name}
           </h3>
         </div>
         
         <div className="flex flex-wrap gap-1.5 mt-3">
-          <Badge variant="outline" className={cn('text-xs font-medium border', PRICE_COLORS[resource.price])}>
+          <Badge variant="outline" className={cn('text-xs font-medium border shadow-none', PRICE_COLORS[resource.price])}>
             {resource.price === 'Free' ? '免费' : resource.price === 'Freemium' ? '免费增值' : '付费'}
           </Badge>
           
           {resource.is_open_source && (
-            <Badge variant="outline" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 text-xs font-medium">
+            <Badge variant="outline" className="bg-blue-500/5 text-blue-700 dark:text-blue-400 border-blue-500/10 text-xs font-medium shadow-none">
               开源
             </Badge>
           )}
           
-          <Badge variant="secondary" className="text-xs text-muted-foreground bg-muted/50">
+          <Badge variant="secondary" className="text-xs text-muted-foreground bg-muted/50 border border-transparent hover:border-border transition-colors shadow-none">
             {getCategoryName(resource.category)}
           </Badge>
         </div>
@@ -79,7 +81,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
         <Button
           variant="default"
           size="sm"
-          className="w-full gap-2 transition-all duration-300 shadow-sm hover:shadow-md bg-linear-to-r from-primary to-primary/90 hover:to-primary"
+          className="w-full gap-2 transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-primary/20 bg-linear-to-r from-primary to-primary/90 hover:to-primary hover:scale-[1.02]"
           asChild
         >
           <a
