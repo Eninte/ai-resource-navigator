@@ -17,6 +17,7 @@ interface Resource {
   is_open_source: boolean;
   global_sticky_order: number;
   category_sticky_order: number;
+  token?: string;
 }
 
 interface ResourceCardProps {
@@ -85,9 +86,16 @@ export function ResourceCard({ resource }: ResourceCardProps) {
           asChild
         >
           <a
-            href={`/api/go/${resource.id}`}
+            href={resource.token ? `/api/go/${resource.id}?token=${resource.token}` : '#'}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => {
+              if (!resource.token) {
+                e.preventDefault();
+                // Optionally handle missing token (e.g. reload or fetch)
+                console.error('Missing secure token for resource:', resource.name);
+              }
+            }}
           >
             <ExternalLink className="h-4 w-4" />
             访问官网

@@ -18,27 +18,30 @@ export interface Resource {
   global_sticky_order: number;
   category_sticky_order: number;
   published_at: Date | string;
+  token?: string;
 }
 
 interface CategorySectionProps {
   category: string;
   title: string;
+  initialResources?: Resource[];
+  initialTotal?: number;
 }
 
-export function CategorySection({ category, title }: CategorySectionProps) {
-  const [resources, setResources] = useState<Resource[]>([]);
+export function CategorySection({ category, title, initialResources = [], initialTotal = 0 }: CategorySectionProps) {
+  const [resources, setResources] = useState<Resource[]>(initialResources);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [total, setTotal] = useState(0);
   const LIMIT = 12; // 3 rows * 4 cols (Desktop)
+  const [offset, setOffset] = useState(initialResources.length > 0 ? initialResources.length : 0);
+  const [total, setTotal] = useState(initialTotal > 0 ? initialTotal : 0);
 
   const { ref, isVisible } = useIntersectionObserver({
     freezeOnceVisible: true,
     rootMargin: '200px', // Start loading before it enters viewport
   });
 
-  const [hasFetched, setHasFetched] = useState(false);
+  const [hasFetched, setHasFetched] = useState(initialResources.length > 0);
 
   const fetchResources = useCallback(async (isLoadMore = false) => {
     // If already loading, prevent duplicate requests
@@ -47,6 +50,10 @@ export function CategorySection({ category, title }: CategorySectionProps) {
     setError(false);
 
     try {
+      // If we have initial resources and this is the FIRST fetch (triggered by visibility), 
+      // we might not need to fetch if initialResources already covers the first page.
+      // But if initialResources was passed (SSR), setHasFetched is true, so this won't auto-run.
+      
       const currentOffset = isLoadMore ? offset : 0;
       const response = await fetch(
         `/api/resources?category=${category}&limit=${LIMIT}&offset=${currentOffset}`
@@ -74,6 +81,7 @@ export function CategorySection({ category, title }: CategorySectionProps) {
   }, [category, offset, title]);
 
   useEffect(() => {
+    // Only auto-fetch if we didn't have initial data
     if (isVisible && !hasFetched) {
       setHasFetched(true);
       fetchResources();
@@ -81,7 +89,7 @@ export function CategorySection({ category, title }: CategorySectionProps) {
   }, [isVisible, hasFetched, fetchResources]);
 
   // Placeholder to preserve layout stability before loading
-  if (!hasFetched && !isVisible) {
+  if (!hasFetched && !isVisible && resources.length === 0) {
     return <div ref={ref as React.RefObject<HTMLDivElement>} className="min-h-[300px]" />;
   }
 

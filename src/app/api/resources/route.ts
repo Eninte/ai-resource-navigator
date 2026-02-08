@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Prisma, Resource } from '@prisma/client';
 import { db } from '@/lib/supabase-db';
+import { generateToken } from '@/lib/url-security';
 
 type ResourceListItem = Pick<
   Resource,
@@ -14,7 +15,7 @@ type ResourceListItem = Pick<
   | 'global_sticky_order'
   | 'category_sticky_order'
   | 'published_at'
->;
+> & { token?: string };
 
 const MOCK_RESOURCES = [
   {
@@ -267,8 +268,14 @@ export async function GET(request: Request) {
       timeoutPromise
     ]);
 
+    // Sign tokens for each resource
+    const resourcesWithTokens = await Promise.all(resources.map(async (res) => ({
+      ...res,
+      token: await generateToken(res.id)
+    })));
+
     return NextResponse.json({
-      resources,
+      resources: resourcesWithTokens,
       total,
       limit,
       offset
@@ -298,8 +305,14 @@ export async function GET(request: Request) {
       mockResources = mockResources.slice(offset, offset + limit);
     }
     
+    // Sign tokens for mock resources too
+    const mockResourcesWithTokens = await Promise.all(mockResources.map(async (res) => ({
+      ...res,
+      token: await generateToken(res.id)
+    })));
+    
     return NextResponse.json({
-      resources: mockResources,
+      resources: mockResourcesWithTokens,
       total,
       limit,
       offset,

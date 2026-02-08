@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import type { Prisma } from '@prisma/client';
+import type { Prisma, Resource } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { createClient } from '@supabase/supabase-js';
@@ -49,7 +49,7 @@ const getSupabase = () => {
 // Database abstraction layer
 export const db = {
   resource: {
-    findMany: async (params: Prisma.ResourceFindManyArgs) => {
+    findMany: async (params: Prisma.ResourceFindManyArgs): Promise<Resource[]> => {
       if (USE_SUPABASE_API) {
         // Use Supabase API for local development
         const { where, orderBy, select } = params;
@@ -110,7 +110,7 @@ export const db = {
         const { data, error } = await query;
 
         if (error) throw error;
-        return data;
+        return (data || []) as unknown as Resource[];
       } else {
         // Use Prisma in production
         return prisma.resource.findMany(params);
