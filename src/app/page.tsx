@@ -35,6 +35,22 @@ export default function Home() {
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
 
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await fetch('/api/stats');
+      if (response.ok) {
+        const data = await response.json();
+        setCategoryCounts(data);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
   const isFiltering = !!(searchQuery || selectedCategory || sortBy !== 'default');
 
   const fetchResources = useCallback(async () => {
@@ -55,13 +71,6 @@ export default function Home() {
 
       if (response.ok) {
         setResources(data.resources);
-        
-        // Calculate category counts
-        const counts: Record<string, number> = {};
-        data.resources.forEach((r: Resource) => {
-          counts[r.category] = (counts[r.category] || 0) + 1;
-        });
-        setCategoryCounts(counts);
       } else {
         toast.error('错误', {
           description: '获取资源列表失败',

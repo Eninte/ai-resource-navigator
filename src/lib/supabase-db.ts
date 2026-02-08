@@ -12,11 +12,16 @@ const globalForPrisma = globalThis as unknown as {
 const createPrismaClient = () => {
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    connectionTimeoutMillis: 10000,
+    connectionTimeoutMillis: 30000,
+    idleTimeoutMillis: 30000,
+    max: 10,
     ssl: { rejectUnauthorized: false },
   });
   const adapter = new PrismaPg(pool);
-  return new PrismaClient({ adapter });
+  return new PrismaClient({
+    adapter,
+    log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
+  });
 };
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
@@ -219,6 +224,44 @@ export const db = {
         return { id: where.id };
       } else {
         return prisma.resource.delete(params);
+      }
+    },
+
+    groupBy: async (params: { by: string[]; where?: { status?: string }; _count?: { _all: true } }) => {
+      type GroupByResult = { category: string; _count: { _all: number } };
+
+      if (USE_SUPABASE_API) {
+        const { by, where } = params;
+        const client = getSupabase();
+        let query = client
+          .from('Resource')
+          .select(by?.[0] || '*', { count: 'exact' });
+
+        if (where?.status) {
+          query = query.eq('status', where.status);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        const counts: Record<string, number> = {};
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data?.forEach((item: any) => {
+          const key = item.category as string;
+          counts[key] = (counts[key] || 0) + 1;
+        });
+
+        const result: GroupByResult[] = Object.entries(counts).map(([category, count]) => ({
+          category,
+          _count: { _all: count },
+        }));
+
+        return result;
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return prisma.resource.groupBy(params as any) as unknown as GroupByResult[];
       }
     },
   },
